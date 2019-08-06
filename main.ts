@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, BrowserWindowConstructorOptions } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 
@@ -12,7 +12,7 @@ function createWindow() {
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
   // Create the browser window.
-  win = new BrowserWindow({
+  win = new BrowserWindow( <BrowserWindowConstructorOptions>{
     x: 0,
     y: 0,
     width: size.width,
@@ -21,6 +21,8 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
+
+  win.setMenu(null);
 
   if (serve) {
     require('electron-reload')(__dirname, {

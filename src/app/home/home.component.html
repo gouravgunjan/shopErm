@@ -1,5 +1,24 @@
-<div class="container">
-  <h1 class="title">
-    {{ 'PAGES.HOME.TITLE' | translate }}
-  </h1>
+<mat-toolbar color="primary">
+  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+    <i class="material-icons">menu</i>
+  </button>
+  <mat-menu #menu="matMenu">
+      <button mat-menu-item>
+        <span>Redial</span>
+      </button>
+      <button mat-menu-item disabled>
+        <span>Check voice mail</span>
+      </button>
+      <button mat-menu-item>
+        <span>Disable alerts</span>
+      </button>
+    </mat-menu>
+  <span>NoCo Bill Management</span>
+  <span class="spacer"></span>
+  <button mat-icon-button >
+    <i class="material-icons">search</i>
+  </button>
+</mat-toolbar>
+<div class="home-body">
+    <app-bill-entry></app-bill-entry>
 </div>

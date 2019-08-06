@@ -1,25 +1,12 @@
-import { Entity, Column, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-
-
-@Entity()
-export class InventoryItem {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column({
-        length: 100
-    })
-    itemName: string;
-
-    @Column()
-    itemWeightInKgs: number;
-
-    @Column()
-    itemPrice: number;
-
-    @Column()
+export class InventoryEntryItem {
+    inventoryEntryId: number;
+    inventoryCode: string;
+    inventoryName: string;
+    weightInKgs: number;
+    inventoryPrice: number;
     dateOfPurchase: Date;
-
-    @Column()
-    timeStamp: Date;
+    updateTS: Date;
 }
+
+// inventoryEntryId, inventoryName, inventoryPrice,
+// dateOfPurchase, updateTS, weightInKgs, inventoryCode

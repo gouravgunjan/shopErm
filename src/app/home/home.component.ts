@@ -11,7 +11,7 @@ export class HomeComponent implements OnInit {
   constructor(private databaseService: DatabaseService) { }
 
   async ngOnInit() {
-    await this.databaseService.createTable();
+    await this.databaseService.insertRawInventory();
   }
 
 }

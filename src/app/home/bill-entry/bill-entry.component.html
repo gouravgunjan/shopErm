@@ -1,0 +1,10 @@
+<form class="keyboard-entry-form">
+    <mat-form-field class="full-width">
+        <input type="text" placeholder="Table" aria-label="Number" matInput [formControl]="tableControl" [matAutocomplete]="auto">
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+        <mat-option *ngFor="let option of filteredTableOptions | async" [value]="option">
+            {{option}}
+        </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</form>

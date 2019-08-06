@@ -1,0 +1,13 @@
+<h1 mat-dialog-title *ngIf="data.header">
+    {{ data.header }}
+</h1>
+<div mat-dialog-content>
+    <p>
+        {{ data.message }}
+    </p>
+</div>
+<div mat-dialog-actions>
+    <button mat-button *ngIf="data.okButtonAction" (click)="data.okButtonAction()">{{ data.okButtonText }}</button>
+    <button mat-button *ngIf="data.cancelButtonAction" (click)="data.cancelButtonAction()">{{ data.cancelButtonText }}</button>
+    <button mat-button *ngIf="!data.cancelButtonAction" matDialogClose>Close</button>
+</div>
