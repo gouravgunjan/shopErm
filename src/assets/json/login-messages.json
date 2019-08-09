@@ -1,0 +1,5 @@
+{
+    "successMessage": "User Authenticated",
+    "failureMessage": "User/Password not correct",
+    "headerMessage": "Login Failed!"
+}

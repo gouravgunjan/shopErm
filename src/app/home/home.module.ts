@@ -11,6 +11,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { BillEntryComponent } from './bill-entry/bill-entry.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import { AgGridModule } from 'ag-grid-angular';
 
 @NgModule({
   declarations: [HomeComponent,
@@ -24,7 +26,9 @@ import { MatInputModule } from '@angular/material/input';
       MatFormFieldModule,
       MatInputModule,
       MatMenuModule,
+      MatListModule,
       MatAutocompleteModule,
+      AgGridModule,
       MatToolbarModule]
 })
 export class HomeModule {}

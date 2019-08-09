@@ -9,11 +9,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { LoginRoutingModule } from './login-routing.module';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
     declarations: [LoginComponent],
     imports: [CommonModule,
         MatCardModule,
+        MatProgressSpinnerModule,
         MatInputModule,
         MatFormFieldModule,
         MatButtonModule,

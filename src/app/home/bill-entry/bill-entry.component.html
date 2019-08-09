@@ -1,4 +1,4 @@
-<form class="keyboard-entry-form">
+<!-- <form class="keyboard-entry-form">
     <mat-form-field class="full-width">
         <input type="text" placeholder="Table" aria-label="Number" matInput [formControl]="tableControl" [matAutocomplete]="auto">
         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
@@ -7,4 +7,40 @@
         </mat-option>
         </mat-autocomplete>
     </mat-form-field>
-</form>
+</form> -->
+<div class="bill-addition-container">
+    <button mat-stroked-button color="primary"><i class="material-icons">add</i> Start New Bill</button>
+</div>
+<div class="bill-list-details-container">
+    <div class="bill-list-container">
+        <mat-nav-list>
+            <h3 mat-subheader>Active Bills</h3>
+            <mat-list-item *ngFor="let bill of billListItems"
+                [ngClass]="{'is-active': bill.isSelected}"
+                (click)="showBillDetails(bill)">
+                <i matListIcon class="material-icons">assignment</i>
+                <div matLine class="bill-name">
+                    <span class="name"> {{ bill.billEntryId }} 
+                            <span class="customer-type">({{ bill.customerType }})</span>
+                    </span>
+                    
+                </div>
+                <span class="spacer"></span>
+                <div class="cost-time-container">
+                    <span class="cost" *ngIf="bill.currentTotalCost"> Rs. {{ bill.currentTotalCost }}</span>
+                    <span class="time">{{ bill.startTime | date:'MMM d, y, h:mm a' }}</span>
+                </div>
+            </mat-list-item>
+        </mat-nav-list>
+    </div>
+    <div class="bill-details-container" #parentContainer>
+        <ag-grid-angular
+            [style.width.px]="gridDim.width"
+            [style.height.px]="gridDim.height"
+            class="ag-theme-material"
+            [rowData]="rowData" 
+            [columnDefs]="columnDefs"
+            >
+        </ag-grid-angular>
+    </div>
+</div>

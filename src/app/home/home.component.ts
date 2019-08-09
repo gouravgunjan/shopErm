@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DatabaseService } from '../core/services/database/database.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -8,10 +9,12 @@ import { DatabaseService } from '../core/services/database/database.service';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private databaseService: DatabaseService) { }
+  constructor(private databaseService: DatabaseService, private router: Router) { }
 
   async ngOnInit() {
-    await this.databaseService.insertRawInventory();
   }
 
+  logout() {
+    this.router.navigate(['/login']);
+  }
 }

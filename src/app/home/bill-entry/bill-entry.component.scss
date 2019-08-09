@@ -1,0 +1,44 @@
+@import '@angular/material/_theming.scss';
+@include mat-core();
+
+.bill-list-details-container {
+    display: flex;
+    flex-direction: row;
+    .bill-list-container {
+        display: flex;
+        width: 30%;
+        mat-nav-list {
+            width: 100%;
+            mat-list-item {
+                &.is-active {
+                    background-color: #EEEEEE;  
+                }
+                .bill-name {
+                    .customer-type {
+                        font-size: 0.8rem;
+                        padding-top: 3px;
+                        color: mat-color($mat-deep-purple, 200);
+                    }
+                }
+                
+                .cost-time-container {
+                    display: flex;
+                    flex-direction: column;
+                    .cost {
+                        color: mat-color($mat-green, 500);
+                    }
+                    .time {
+                        width: max-content;
+                        font-size: 0.6rem;
+                        color: rbga(0, 0, 0, 0.6);
+                    }
+                }
+            }
+            
+        }
+    }
+    .bill-details-container {
+        width: calc(70% - 16px);
+        margin-left: 16px;
+    }
+}
