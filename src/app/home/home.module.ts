@@ -13,10 +13,19 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import { AgGridModule } from 'ag-grid-angular';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { QuantityGridComponent } from './bill-entry/grid-components/quantity/quantity.component';
+import { BillDetailsActionGridComponent } from './bill-entry/grid-components/bill-details-action/bill-details-action.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { WhiteBoardService } from '../core/services/whiteboard.service';
 
 @NgModule({
   declarations: [HomeComponent,
-    BillEntryComponent],
+    BillEntryComponent,
+    QuantityGridComponent,
+    BillDetailsActionGridComponent
+  ],
   imports: [CommonModule,
       SharedModule,
       HomeRoutingModule,
@@ -27,8 +36,15 @@ import { AgGridModule } from 'ag-grid-angular';
       MatInputModule,
       MatMenuModule,
       MatListModule,
+      MatSnackBarModule,
       MatAutocompleteModule,
-      AgGridModule,
-      MatToolbarModule]
+      AgGridModule.withComponents([
+        BillDetailsActionGridComponent,
+        QuantityGridComponent
+      ]),
+      MatProgressBarModule,
+      MatProgressSpinnerModule,
+      MatToolbarModule],
+    providers: [WhiteBoardService]
 })
 export class HomeModule {}

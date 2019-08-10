@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen, BrowserWindowConstructorOptions } from 'electron';
+import { app, BrowserWindow, screen, BrowserWindowConstructorOptions, Menu, MenuItem } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 

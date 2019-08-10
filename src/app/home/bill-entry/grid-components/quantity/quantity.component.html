@@ -1,0 +1,11 @@
+<form>
+    <button [disabled]="updating" mat-icon-button color="primary" aria-label="Add quantity" (click)="decrementQuantity()">
+        <i class="material-icons">remove_circle</i>
+    </button>
+    <mat-form-field class="quantity-input-container">
+        <input [disabled]="updating" matInput [(ngModel)]="quantity" (ngModelChange)="quantityChanged()" name="quantity">
+    </mat-form-field>
+    <button [disabled]="updating" mat-icon-button color="primary" aria-label="Remove quantity" (click)="incrementQuantity()">
+        <i class="material-icons">add_circle</i>
+    </button>
+</form>

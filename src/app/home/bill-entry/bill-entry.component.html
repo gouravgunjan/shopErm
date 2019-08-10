@@ -1,46 +1,70 @@
-<!-- <form class="keyboard-entry-form">
-    <mat-form-field class="full-width">
-        <input type="text" placeholder="Table" aria-label="Number" matInput [formControl]="tableControl" [matAutocomplete]="auto">
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-        <mat-option *ngFor="let option of filteredTableOptions | async" [value]="option">
-            {{option}}
-        </mat-option>
-        </mat-autocomplete>
-    </mat-form-field>
-</form> -->
 <div class="bill-addition-container">
     <button mat-stroked-button color="primary"><i class="material-icons">add</i> Start New Bill</button>
 </div>
 <div class="bill-list-details-container">
     <div class="bill-list-container">
         <mat-nav-list>
-            <h3 mat-subheader>Active Bills</h3>
-            <mat-list-item *ngFor="let bill of billListItems"
+            <h3 mat-subheader><span *ngIf="isActiveBillsLoading">Loading</span>&nbsp;Active Bills </h3>
+            <mat-progress-bar *ngIf="isActiveBillsLoading" mode="indeterminate"></mat-progress-bar>
+            <mat-list-item *ngFor="let bill of runningBills"
                 [ngClass]="{'is-active': bill.isSelected}"
                 (click)="showBillDetails(bill)">
                 <i matListIcon class="material-icons">assignment</i>
                 <div matLine class="bill-name">
-                    <span class="name"> {{ bill.billEntryId }} 
-                            <span class="customer-type">({{ bill.customerType }})</span>
+                    <span class="name"> Bill #{{ bill.billEntryId }} 
+                        <span class="customer-type">({{ bill.customerType }})</span>
                     </span>
                     
                 </div>
                 <span class="spacer"></span>
                 <div class="cost-time-container">
-                    <span class="cost" *ngIf="bill.currentTotalCost"> Rs. {{ bill.currentTotalCost }}</span>
+                    <span class="cost" *ngIf="bill.currentTotalCost"> Rs. {{ bill.currentTotalCost | number: '1.0-0' }}</span>
                     <span class="time">{{ bill.startTime | date:'MMM d, y, h:mm a' }}</span>
                 </div>
             </mat-list-item>
         </mat-nav-list>
     </div>
     <div class="bill-details-container" #parentContainer>
+        <h3 class="mat-subheader">Bill Details </h3>
+        <form class="keyboard-entry-form">
+            <mat-form-field class="full-width">
+                <input type="text" placeholder="Add New Item" aria-label="String" 
+                    matInput [formControl]="newMenuItemControl" [matAutocomplete]="auto">
+                <mat-autocomplete autoActiveFirstOption 
+                [displayWith]="menuItemValueDisplayFunc"
+                (optionSelected)="newMenuItemChange($event)" #auto="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredMenuList | async" [value]="option" >
+                        {{ option.menuItem }} ({{ option.menuCode }})
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+        </form>
         <ag-grid-angular
             [style.width.px]="gridDim.width"
             [style.height.px]="gridDim.height"
             class="ag-theme-material"
-            [rowData]="rowData" 
-            [columnDefs]="columnDefs"
+            [gridOptions]="gridOptions"
+            (gridReady)="onGridReady($event)"
             >
         </ag-grid-angular>
+        <div class="total-print-section">
+            <div class="total-section">
+                <span class="gst">
+                    <span class="label">SGST (2.5%):</span> Rs. {{ sgstTotal | number: '1.1-2' }}
+                </span>
+                <span class="gst">
+                    <span class="label">SGST (2.5%): </span> Rs. {{ cgstTotal | number: '1.1-2' }}
+                </span>
+                <span class="total">
+                    <span class="label">Total:</span> Rs. {{ total | number: '1.0-0' }}
+                </span>
+            </div>
+            <span class="spacer"></span>
+            <button mat-stroked-button color="primary"><i class="material-icons">print</i> Complete and Print</button>
+        </div>
+        <div class="overlay" *ngIf="billDetailsOverlayMessage !== ''">
+            <mat-spinner *ngIf="billDetailsOverlayMessage === 'Loading bill details...'"></mat-spinner>
+            <h3 *ngIf="billDetailsOverlayMessage !== 'Loading bill details...'">{{ billDetailsOverlayMessage }}</h3>
+        </div>
     </div>
 </div>

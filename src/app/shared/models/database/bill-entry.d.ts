@@ -1,6 +1,8 @@
 export interface BillEntry {
     billId: number;
-    billEntryId: string;
+    billEntryId: number;
     menuItem: string;
     quantity: number;
+    menuPrice: number;
+    menuCode: string;
 }

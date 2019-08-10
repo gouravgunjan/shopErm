@@ -1,5 +1,5 @@
 export interface BillListItem {
-    billEntryId: string;
+    billEntryId: number;
     currentTotalCost?: number;
     startTime: Date;
     customerType: string;
