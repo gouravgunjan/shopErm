@@ -4,4 +4,5 @@ export interface BillListItem {
     startTime: Date;
     customerType: string;
     isSelected?: boolean;
+    isOverdue?: boolean;
 }

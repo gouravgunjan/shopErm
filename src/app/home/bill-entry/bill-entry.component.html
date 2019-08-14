@@ -1,20 +1,30 @@
 <div class="bill-addition-container">
-    <button mat-stroked-button color="primary"><i class="material-icons">add</i> Start New Bill</button>
+    <form>
+        <mat-form-field class="new-bill-type">
+            <input type="text" placeholder="Table Number / Customer Type" aria-label="String" 
+                matInput [formControl]="newBillEntryControl" [matAutocomplete]="autoEntry" #billEntryAddition="matInput">
+            <mat-autocomplete autoActiveFirstOption #autoEntry="matAutocomplete">
+                <mat-option *ngFor="let option of filteredEntryType | async" [value]="option" >
+                    {{ option }}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <button mat-stroked-button [disabled]="!newBillEntryButtonEnabled" color="primary" (click)="newBillEntryClick()"><i class="material-icons">add</i> Start New Bill</button>
+    </form>
 </div>
 <div class="bill-list-details-container">
     <div class="bill-list-container">
         <mat-nav-list>
-            <h3 mat-subheader><span *ngIf="isActiveBillsLoading">Loading</span>&nbsp;Active Bills </h3>
+            <h3 mat-subheader><span *ngIf="isActiveBillsLoading">Loading</span>&nbsp;Active Bills <span *ngIf="runningBills">({{ runningBills.length }})</span></h3>
             <mat-progress-bar *ngIf="isActiveBillsLoading" mode="indeterminate"></mat-progress-bar>
             <mat-list-item *ngFor="let bill of runningBills"
-                [ngClass]="{'is-active': bill.isSelected}"
+                [ngClass]="{'is-active': bill.isSelected, 'overdue': bill.isOverdue}"
                 (click)="showBillDetails(bill)">
                 <i matListIcon class="material-icons">assignment</i>
                 <div matLine class="bill-name">
                     <span class="name"> Bill #{{ bill.billEntryId }} 
                         <span class="customer-type">({{ bill.customerType }})</span>
                     </span>
-                    
                 </div>
                 <span class="spacer"></span>
                 <div class="cost-time-container">
@@ -27,7 +37,7 @@
     <div class="bill-details-container" #parentContainer>
         <h3 class="mat-subheader">Bill Details </h3>
         <form class="keyboard-entry-form">
-            <mat-form-field class="full-width">
+            <mat-form-field class="item-entry">
                 <input type="text" placeholder="Add New Item" aria-label="String" 
                     matInput [formControl]="newMenuItemControl" [matAutocomplete]="auto">
                 <mat-autocomplete autoActiveFirstOption 
@@ -38,10 +48,20 @@
                     </mat-option>
                 </mat-autocomplete>
             </mat-form-field>
+            <mat-form-field class="promo-code-entry">
+                <input type="text" placeholder="Promo Code" aria-label="String" 
+                    matInput [formControl]="promoCodeControl" #promoCodeInput
+                     [matAutocomplete]="autoPromo">
+                <mat-autocomplete [displayWith]="promoItemValueDisplayFunc" autoActiveFirstOption
+                    (optionSelected)="promoCodeSelected($event)" #autoPromo="matAutocomplete">
+                    <mat-option *ngFor="let option of filteredPromoCode | async" [value]="option" >
+                        <span *ngIf="option">{{ option.promoCode }}</span>
+                    </mat-option>
+                    <mat-option>None</mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
         </form>
         <ag-grid-angular
-            [style.width.px]="gridDim.width"
-            [style.height.px]="gridDim.height"
             class="ag-theme-material"
             [gridOptions]="gridOptions"
             (gridReady)="onGridReady($event)"
@@ -49,11 +69,15 @@
         </ag-grid-angular>
         <div class="total-print-section">
             <div class="total-section">
-                <span class="gst">
-                    <span class="label">SGST (2.5%):</span> Rs. {{ sgstTotal | number: '1.1-2' }}
+                <span class="promo" *ngIf ="appliedPromoCode">
+                    <span class="label">Discount ({{ appliedPromoCode.promoDiscountPercent }}%): </span> 
+                        Rs. {{ (total * appliedPromoCode.promoDiscountPercent / 100) | number: '1.0-0' }}
                 </span>
                 <span class="gst">
-                    <span class="label">SGST (2.5%): </span> Rs. {{ cgstTotal | number: '1.1-2' }}
+                    <span class="label">SGST (2.5%):</span> Rs. {{ sgstTotal | number: '1.0-0' }}
+                </span>
+                <span class="gst">
+                    <span class="label">SGST (2.5%): </span> Rs. {{ cgstTotal | number: '1.0-0' }}
                 </span>
                 <span class="total">
                     <span class="label">Total:</span> Rs. {{ total | number: '1.0-0' }}

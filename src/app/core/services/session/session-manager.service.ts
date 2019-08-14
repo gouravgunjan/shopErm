@@ -27,4 +27,8 @@ export class SessionManager {
         });
         return resultSub.asObservable();
     }
+
+    public get entryUser(): string {
+        return this.sessionInfo.userName;
+    }
 }

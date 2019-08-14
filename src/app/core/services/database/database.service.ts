@@ -9,6 +9,7 @@ import * as databaseGenericMessages from '../../../../assets/json/database-gener
 import { BillListItem } from '../../../shared/models/ui-models/bill-list-item';
 import { BillEntry } from '../../../shared/models/database/bill-entry';
 import { MenuRepo } from '../../../shared/models/database/menu-repo';
+import { PromoBillEntry } from '../../../shared/models/ui-models/promo-bill-entry';
 
 @Injectable()
 export class DatabaseService {
@@ -26,10 +27,34 @@ export class DatabaseService {
         return resultSubject.asObservable();
     }
 
+    public getCustomerTypesSortedByUsage(): Observable<string[]> {
+        return this.runQuery(`select customerType from bill_repo
+            group by customerType order by count(customerType) desc`).pipe(
+                map(entries => {
+                    const resultArr: string[] = [];
+                    entries.forEach(element => {
+                        resultArr.push(element.customerType);
+                    });
+                    return resultArr;
+                }));
+    }
+
     public getTotalCostForBillId(billEntryId: number): Observable<number> {
-        return this.runQuery(`select SUM(mr.menuPrice*be.quantity) as totalPrice from bill_entry as be
+        return this.runQuery(`select SUM(mr.menuPrice*be.quantity) as totalPrice, pr.promoDiscountPercent from bill_entry as be
             join menu_repo as mr on mr.menuItem = be.menuItem
-            where be.billEntryId = '${billEntryId}'`).pipe(map(result =>  (result[0].totalPrice) + (result[0].totalPrice * 0.05)));
+            left join bill_repo as br on br.billEntryId = be.billEntryId
+            left join promo_repo as pr on br.promoCode = pr.promoCode
+            where be.billEntryId = '${billEntryId}'`).pipe(
+                map(result =>  {
+                    let total: number = result[0].totalPrice;
+                    if (total > 0) {
+                        if (result[0].promoDiscountPercent) {
+                            total -= total * result[0].promoDiscountPercent / 100;
+                        }
+                        total += total * 0.05;
+                    }
+                    return total;
+                }));
     }
 
     public getCompleteDetailsForBillEntry(billEntryId: number): Observable<BillEntry[]> {
@@ -41,12 +66,41 @@ export class DatabaseService {
 
     public updateQuantityForBillEntry(billId: number, quantity: number): Observable<boolean> {
         return this.runQuery(`update bill_entry set quantity = ${quantity} where  billId=${billId}`)
-            .pipe(tap((update) => console.log('bill quantity Changed', update)), take(1));
+            .pipe(tap((update) => console.log('bill quantity Changed', update)));
     }
 
     public addNewBillEntryDetail(menuItem: string, billEntryId: number): Observable<number> {
         return this.runQuery(`insert into bill_entry (billEntryId, menuItem, quantity)
-            values(${billEntryId}, '${menuItem}', 1)`).pipe(take(1), map(result => result.insertId));
+            values(${billEntryId}, '${menuItem}', 1)`).pipe(map(result => result.insertId));
+    }
+
+    public addNewBillEntry(customerType: string, entryUser: string): Observable<number> {
+        return this.runQuery(`insert into bill_repo (isComplete, customerType, startTime, entryUser)
+            values(false, '${customerType}', current_timestamp(), '${entryUser}')`).pipe(map(result => result.insertId));
+    }
+
+    public getAllPromoCodes(): Observable<PromoBillEntry[]> {
+        return this.runQuery(`select promoCode, promoDiscountPercent from promo_repo where promoCounter > 0`);
+    }
+
+    public getPromoCodeForBillEntry(billEntryId: number): Observable<PromoBillEntry> {
+        return this.runQuery(`select pr.promoCode, pr.promoDiscountPercent from bill_repo br
+            join promo_repo pr on pr.promoCode = br.promoCode
+            where billEntryId=${billEntryId}`).pipe(
+            map(result => {
+                if (result && result.length > 0) {
+                    return result[0];
+                }
+                return null;
+            })
+        );
+    }
+
+    public applyPromo(promoCode: string, billEntryId: number): Observable<boolean> {
+        return this.runQuery(`call applyPromoCode('${promoCode}', ${billEntryId})`).pipe(map(queryRes => {
+            console.log('apply promo code: ', queryRes);
+            return queryRes[0][0].result;
+        }));
     }
 
     public removeBillDetailRow(billId: number) {
@@ -65,7 +119,7 @@ export class DatabaseService {
             console.log(error);
             resultSubject.next(databaseGenericMessages.connectionFailureMessage);
         });
-        return resultSubject.asObservable().pipe(take(1));
+        return resultSubject.asObservable();
     }
 
     public makeLoginEntry(userId: string): void {

@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone, OnDestroy, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { DatabaseService } from '../../core/services/database/database.service';
 import { FormControl } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, timer } from 'rxjs';
 import { startWith, map, take } from 'rxjs/operators';
 import { BillListItem } from '../../shared/models/ui-models/bill-list-item';
 import { BillEntry } from '../../shared/models/database/bill-entry';
@@ -13,6 +13,10 @@ import { MenuRepo } from '../../shared/models/database/menu-repo';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { WhiteBoardService } from '../../core/services/whiteboard.service';
+import { SessionManager } from '../../core/services/session/session-manager.service';
+import { MatInput } from '@angular/material/input';
+import { PromoBillEntry } from '../../shared/models/ui-models/promo-bill-entry';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-bill-entry',
@@ -23,22 +27,30 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
     private subArr: Subscription[] = [];
     private gridApi: GridApi;
     private billDetailsTableEntries: BillDetailItem[];
-    private menuItems: MenuRepo[] = [{
-        menuId: -1,
-        menuCode: '0',
-        menuItem: 'Loading...',
-        menuPrice: 0
-    }];
+    private menuItems: MenuRepo[] = [];
+    private billEntryTypes: string[] = [];
+    private promoCodes: PromoBillEntry[] = [];
+    private newBillCustomerType: string;
 
     @ViewChild('parentContainer', { static: false })
     parentContainerRef: ElementRef;
+    @ViewChild('billEntryAddition', {static: false})
+    billEntryMatInput: MatInput;
+    @ViewChild('promoCodeInput', { static: false})
+    promoCodeInput: MatInput;
 
     isActiveBillsLoading = true;
     billDetailsOverlayMessage = 'Please select a Bill to see details.';
     gridOptions: GridOptions;
     runningBills: BillListItem[];
     filteredMenuList: Observable<MenuRepo[]>;
+    filteredEntryType: Observable<string[]>;
+    filteredPromoCode: Observable<PromoBillEntry[]>;
+    appliedPromoCode: PromoBillEntry;
     newMenuItemControl = new FormControl();
+    newBillEntryControl = new FormControl();
+    promoCodeControl = new FormControl();
+    newBillEntryButtonEnabled = true;
     newMenuItem: string;
     sgstTotal = 0;
     cgstTotal = 0;
@@ -51,29 +63,46 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     constructor(private databaseService: DatabaseService,
         private whiteBoard: WhiteBoardService,
-        private snackBar: MatSnackBar) {
+        private snackBar: MatSnackBar,
+        private sessionManager: SessionManager) {
     }
 
     ngOnInit(): void {
         this._initialiseGridOptions();
-        this.subArr.push(
-            this.databaseService.refreshActiveBillList().subscribe(billListItems => {
-                this.runningBills = billListItems;
-                this.isActiveBillsLoading = false;
-                billListItems.forEach(item => this._updateTotalForBillEntry(item.billEntryId));
-            })
-        );
-        this.databaseService.getCompleteMenuRepo().pipe(take(1)).subscribe(menuItemsFromServer => {
+        this.databaseService.refreshActiveBillList().subscribe(billListItems => {
+            this.runningBills = billListItems.sort((a, b) => a.billEntryId - b.billEntryId);
+            this.isActiveBillsLoading = false;
+            this._recalculateBillOverdue();
+            billListItems.forEach(item => this._updateTotalForBillEntry(item.billEntryId));
+        })
+        this.databaseService.getCustomerTypesSortedByUsage().subscribe(customerTypes => {
+            console.log('bill entries', customerTypes);
+            this.billEntryTypes = customerTypes;
+        });
+        this.databaseService.getCompleteMenuRepo().subscribe(menuItemsFromServer => {
             console.log('menu items', menuItemsFromServer);
             this.menuItems = menuItemsFromServer;
         });
+        this.databaseService.getAllPromoCodes().subscribe(promoCodes => this.promoCodes = promoCodes);
         this.filteredMenuList = this.newMenuItemControl.valueChanges.pipe(
-            startWith(''),
             map(value => this._filterMenuItemsText(value))
+        );
+        this.filteredEntryType = this.newBillEntryControl.valueChanges.pipe(
+            map(value => {
+                this._checkAndSetNewBillButtonEnabled(value);
+                return this._filterCustomerType(value);
+            })
+        );
+        this.filteredPromoCode = this.promoCodeControl.valueChanges.pipe(
+            map(value => this._filterPromoCode(value))
         );
         this.whiteBoard.billTotalChange.subscribe(billEntryId => {
             this._recalculateTotal();
             this._updateTotalForBillEntry(billEntryId);
+        });
+
+        timer(60 * 1000, 60 * 1000).subscribe(() => {
+            this._recalculateBillOverdue();
         });
     }
 
@@ -94,6 +123,8 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     showBillDetails(bill: BillListItem) {
         this.billDetailsTableEntries = null;
+        this.appliedPromoCode = null;
+        (<any>this.promoCodeInput).nativeElement.value = '';
         this.runningBills.forEach(billEntry => {
             if (billEntry.billEntryId !== bill.billEntryId) {
                 billEntry.isSelected = false;
@@ -103,8 +134,13 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         if (bill.isSelected) {
             // update the bill detail section
             this.billDetailsOverlayMessage = 'Loading bill details...';
+            this.databaseService.getPromoCodeForBillEntry(bill.billEntryId).subscribe(result => {
+                if (result) {
+                    this.appliedPromoCode = result;
+                    (<any>this.promoCodeInput).nativeElement.value = this.appliedPromoCode.promoCode;
+                }
+            });
             this.databaseService.getCompleteDetailsForBillEntry(bill.billEntryId).subscribe(detailRows => {
-                console.log('data for bill Entry', detailRows);
                 this.billDetailsOverlayMessage = '';
                 this._processBillDetails(detailRows);
                 if (this.gridApi) {
@@ -116,9 +152,24 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    promoCodeSelected(selectedEvent: MatAutocompleteSelectedEvent) {
+        const selectedValue: PromoBillEntry = selectedEvent.option.value;
+        const selectedBillEntryId = this.runningBills.find(item => item.isSelected).billEntryId;
+        this.databaseService.applyPromo(selectedValue ? selectedValue.promoCode : '', selectedBillEntryId).subscribe(isSuccess => {
+            if (isSuccess) {
+                this.appliedPromoCode = selectedValue;
+                this.snackBar.open(selectedValue ? 'Promo Applied!' : 'Promo Removed!', 'Okay', { duration: 3000});
+            } else {
+                this.appliedPromoCode = null;
+                this.snackBar.open('Promo Failed', 'Okay', { duration: 3000 });
+                this.promoCodeControl.reset();
+            }
+            this._recalculateTotal();
+        });
+    }
+
     newMenuItemChange(selectedEvent: MatAutocompleteSelectedEvent) {
         const selectedValue: MenuRepo = selectedEvent.option.value;
-        console.log('selected Menu item', selectedValue);
         // check if the item is alreay present in the list
         let itemAlreadyPresent = false;
         this.gridApi.forEachNode(node => {
@@ -166,6 +217,43 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         return item ? `${item.menuItem} (${item.menuCode})`  : undefined;
     }
 
+    promoItemValueDisplayFunc(item?: PromoBillEntry): string | undefined {
+        return item ? item.promoCode  : undefined;
+    }
+
+    newBillEntryClick(): void {
+        if (this.newBillCustomerType !== '') {
+            this.newBillEntryButtonEnabled = false;
+            this.isActiveBillsLoading = true;
+            this.databaseService.addNewBillEntry(this.newBillCustomerType, this.sessionManager.entryUser).subscribe(entryId => {
+                const newBillEntry: BillListItem = {
+                    billEntryId: entryId,
+                    currentTotalCost: 0,
+                    customerType: this.newBillCustomerType,
+                    isSelected: false,
+                    startTime: new Date()
+                };
+                if (!this.billEntryTypes.some(item => item.toLowerCase() === this.newBillCustomerType.toLowerCase())) {
+                    this.billEntryTypes.push(this.newBillCustomerType);
+                }
+                this.newBillEntryControl.reset();
+                this.runningBills.push(newBillEntry);
+                this.showBillDetails(newBillEntry);
+                this.isActiveBillsLoading = false;
+            });
+        }
+    }
+
+    private _checkAndSetNewBillButtonEnabled(customerType: string) {
+        if (customerType && customerType.trim() === '' ) {
+            this.newBillCustomerType = '';
+            this.newBillEntryButtonEnabled = false;
+        } else if (customerType) {
+            this.newBillCustomerType = customerType.trim();
+            this.newBillEntryButtonEnabled = true;
+        }
+    }
+
     private _updateTotalForBillEntry(billEntryId: number) {
         this.databaseService.getTotalCostForBillId(billEntryId).subscribe(billCost => {
             const runningBillItem = this.runningBills.find(item => item.billEntryId === billEntryId);
@@ -203,8 +291,25 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         };
     }
 
+    private _filterPromoCode(value: any): PromoBillEntry[] {
+        if (value && value.toLowerCase) {
+            const filterValue = value.toLowerCase();
+            return this.promoCodes.filter(option =>
+                option.promoCode.toLowerCase().indexOf(filterValue) > -1);
+        }
+        return [value];
+    }
+
+    private _filterCustomerType(value: string): string[]  {
+        if (value) {
+            const filterValue = value.toLowerCase();
+            return this.billEntryTypes.filter(option =>
+                option.toLowerCase().indexOf(filterValue) > -1);
+    }
+    }
+
     private _filterMenuItemsText(value: any): MenuRepo[] {
-        if (value.toLowerCase) {
+        if (value && value.toLowerCase) {
             const filterValue = value.toLowerCase();
             return this.menuItems.filter(option =>
                 (option.menuItem.toLowerCase().indexOf(filterValue) > -1)
@@ -213,14 +318,31 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         return [value];
     }
 
+    private _recalculateBillOverdue() {
+        if (this.runningBills && this.runningBills.length > 0) {
+            this.runningBills.forEach(billEntry => {
+                if (!billEntry.isOverdue && moment().diff(moment(billEntry.startTime), 'h') > 2) {
+                    billEntry.isOverdue = true;
+                }
+            });
+        }
+    }
+
     private _recalculateTotal() {
         let totalPrice = 0;
-        this.gridApi.forEachNode(node => {
-            totalPrice += node.data.price;
-        });
-        this.sgstTotal = 0.025 * totalPrice;
-        this.cgstTotal = 0.025 * totalPrice;
-        this.total = totalPrice + this.sgstTotal + this.cgstTotal;
+        const billEntry = this.runningBills.find(item => item.isSelected);
+        if (billEntry) {
+            this.gridApi.forEachNode(node => {
+                totalPrice += node.data.price;
+            });
+            this._updateTotalForBillEntry(billEntry.billEntryId);
+            if (this.appliedPromoCode && totalPrice > 0) {
+                totalPrice -= totalPrice * this.appliedPromoCode.promoDiscountPercent / 100;
+            }
+            this.sgstTotal = 0.025 * totalPrice;
+            this.cgstTotal = 0.025 * totalPrice;
+            this.total = totalPrice + this.sgstTotal + this.cgstTotal;
+        }
     }
 
     private _initialiseGridOptions() {

@@ -1,10 +1,19 @@
 @import '@angular/material/_theming.scss';
 @include mat-core();
 
+.bill-addition-container {
+    .new-bill-type {
+        width: 400px;
+        transition: width 0.5s ease-in-out; 
+        padding-right: 10px;
+    }
+}
+
 .bill-list-details-container {
     display: flex;
     flex-direction: row;
-    height: calc(100vh - 150px);
+    height: calc(100vh - 180px);
+    overflow: hidden;
     .bill-list-container {
         display: flex;
         width: 30%;
@@ -14,6 +23,9 @@
             mat-list-item {
                 &.is-active {
                     background-color: #EEEEEE;  
+                }
+                &.overdue {
+                    color: #D50000;
                 }
                 .bill-name {
                     .customer-type {
@@ -44,6 +56,11 @@
         height: 100%;
         margin-left: 16px;
         position: relative;
+        overflow: hidden;
+        ag-grid-angular {
+            height: calc(100% - 150px);
+            width: calc(100% - 10px);
+        }
         h3 {
             font-size: 14px;
             font-weight: 500;
@@ -54,6 +71,13 @@
         }
         .keyboard-entry-form {
             margin-left: 16px;
+            .item-entry {
+                width: 70%;
+                padding-right: 16px;
+            }
+            .promo-code-entry {
+                width: calc(30% - 30px);
+            }
         }
         .total-print-section {
             display: flex;
