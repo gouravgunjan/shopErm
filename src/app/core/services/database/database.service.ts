@@ -51,7 +51,6 @@ export class DatabaseService {
                         if (result[0].promoDiscountPercent) {
                             total -= total * result[0].promoDiscountPercent / 100;
                         }
-                        total += total * 0.05;
                     }
                     return total;
                 }));

@@ -1,18 +1,19 @@
 {
-  "name": "angular-electron",
+  "name": "shop-erm-noco",
   "version": "6.0.1",
   "description": "Angular 8 with Electron (Typescript + SASS + Hot Reload)",
-  "homepage": "https://github.com/maximegris/angular-electron",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "Gourav Gunjan",
+    "email": "gourav.gunjan@gmail.com"
   },
   "keywords": [
     "angular",
     "angular 8",
     "electron",
     "typescript",
-    "sass"
+    "sass",
+    "shop-erm",
+    "noco"
   ],
   "main": "main.js",
   "private": true,

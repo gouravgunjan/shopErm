@@ -2,7 +2,8 @@ import { app, BrowserWindow, screen, BrowserWindowConstructorOptions, Menu, Menu
 import * as path from 'path';
 import * as url from 'url';
 
-let win, serve;
+let win;
+let serve;
 const args = process.argv.slice(1);
 serve = args.some(val => val === '--serve');
 
@@ -17,6 +18,7 @@ function createWindow() {
     y: 0,
     width: size.width,
     height: size.height,
+    fullscreen: true,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -28,7 +30,7 @@ function createWindow() {
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/node_modules/electron`)
     });
-    win.loadURL('http://localhost:4200');
+    win.loadURL('http://localhost:4200/#/login');
   } else {
     win.loadURL(url.format({
       pathname: path.join(__dirname, 'dist/index.html'),
@@ -37,9 +39,9 @@ function createWindow() {
     }));
   }
 
-  if (serve) {
+  // if (serve) {
     win.webContents.openDevTools();
-  }
+  // }
 
   // Emitted when the window is closed.
   win.on('closed', () => {

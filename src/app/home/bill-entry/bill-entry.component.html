@@ -84,7 +84,7 @@
                 </span>
             </div>
             <span class="spacer"></span>
-            <button mat-stroked-button color="primary"><i class="material-icons">print</i> Complete and Print</button>
+            <button mat-stroked-button color="primary" (click)="completeAndPrint()"><i class="material-icons">print</i> Complete and Print</button>
         </div>
         <div class="overlay" *ngIf="billDetailsOverlayMessage !== ''">
             <mat-spinner *ngIf="billDetailsOverlayMessage === 'Loading bill details...'"></mat-spinner>

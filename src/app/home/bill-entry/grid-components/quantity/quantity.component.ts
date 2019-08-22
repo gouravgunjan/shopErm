@@ -13,7 +13,7 @@ import { WhiteBoardService } from '../../../../core/services/whiteboard.service'
 export class QuantityGridComponent implements ICellRendererAngularComp {
     private params: ICellRendererParams;
     quantity: number;
-    udpating: boolean;
+    updating: boolean;
 
     constructor(private dbService: DatabaseService, private whiteBoard: WhiteBoardService) { }
 
@@ -23,13 +23,17 @@ export class QuantityGridComponent implements ICellRendererAngularComp {
             const dataForNode: BillDetailItem = this.params.node.data;
             dataForNode.quantity = +this.quantity;
             dataForNode.price = +this.quantity * dataForNode.menuPrice;
-            this.udpating = true;
-            dataForNode.updating = this.udpating;
+            this.updating = true;
+            dataForNode.updating = this.updating;
             this.params.node.setData(dataForNode);
             this.dbService.updateQuantityForBillEntry(dataForNode.id, dataForNode.quantity).subscribe(() => {
-                this.udpating = false;
-                dataForNode.updating = this.udpating;
+                console.log('quantity updated');
+                this.updating = false;
+                dataForNode.updating = this.updating;
                 this.params.node.setData(dataForNode);
+                this.params.api.redrawRows({
+                    rowNodes: [this.params.node]
+                });
                 this.whiteBoard.notifyBillTotalChange(dataForNode.entryId);
             });
         }
@@ -49,14 +53,14 @@ export class QuantityGridComponent implements ICellRendererAngularComp {
 
     refresh(params: any): boolean {
         console.log('refresh called in quantity');
-        this.udpating = params.data.updating;
+        this.updating = params.data.updating;
         return true;
     }
 
     agInit(params: ICellRendererParams): void {
         this.params = params;
         this.quantity = params.data.quantity;
-        this.udpating = params.data.updating;
+        this.updating = params.data.updating;
     }
 
     afterGuiAttached?(params?: IAfterGuiAttachedParams): void {

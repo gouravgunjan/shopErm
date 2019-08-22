@@ -22,3 +22,9 @@ html, body {
 .mat-stroked-button > .mat-button-wrapper > .material-icons  {
   vertical-align: -6px ;
 }
+
+
+// ag-grid things
+app-bill-print-details .ag-theme-material .ag-cell {
+  line-height: 30px;
+}

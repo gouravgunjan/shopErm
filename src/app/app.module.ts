@@ -24,6 +24,7 @@ import { DialogComponent } from './shared/components/dialog/dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { BillPrintModule } from './bill-print-details/bill-print.module';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -44,6 +45,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     SharedModule,
     HomeModule,
     LoginModule,
+    BillPrintModule,
     AppRoutingModule,
     TranslateModule.forRoot({
       loader: {

@@ -17,6 +17,7 @@ import { SessionManager } from '../../core/services/session/session-manager.serv
 import { MatInput } from '@angular/material/input';
 import { PromoBillEntry } from '../../shared/models/ui-models/promo-bill-entry';
 import * as moment from 'moment';
+import { remote } from 'electron';
 
 @Component({
     selector: 'app-bill-entry',
@@ -74,7 +75,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.isActiveBillsLoading = false;
             this._recalculateBillOverdue();
             billListItems.forEach(item => this._updateTotalForBillEntry(item.billEntryId));
-        })
+        });
         this.databaseService.getCustomerTypesSortedByUsage().subscribe(customerTypes => {
             console.log('bill entries', customerTypes);
             this.billEntryTypes = customerTypes;
@@ -244,6 +245,29 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
+    completeAndPrint() {
+        const selectedBillEntryId = this.runningBills.find(item => item.isSelected).billEntryId;
+        const BrowserWindow = remote.BrowserWindow;
+        const childWin = new BrowserWindow({
+            width: 600,
+            height: 700,
+            alwaysOnTop: true,
+            center: true,
+            modal: true,
+            // minimizable: false,
+            maximizable: false,
+            webPreferences: {
+                nodeIntegration: true
+            }
+        });
+
+        childWin.setMenu(null);
+
+        childWin.loadURL(`http://localhost:4200/#/bill?billEntryId=${selectedBillEntryId}&discount=
+            ${this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0}`);
+        childWin.webContents.openDevTools();
+    }
+
     private _checkAndSetNewBillButtonEnabled(customerType: string) {
         if (customerType && customerType.trim() === '' ) {
             this.newBillCustomerType = '';
@@ -341,7 +365,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
             }
             this.sgstTotal = 0.025 * totalPrice;
             this.cgstTotal = 0.025 * totalPrice;
-            this.total = totalPrice + this.sgstTotal + this.cgstTotal;
+            this.total = totalPrice;
         }
     }
 

@@ -1,0 +1,32 @@
+
+<div class="print">
+    <div class="brand print">
+        <div class="title">
+            NoCo Kitchen
+            <div class="sub-heading">
+                Say No to Cooking
+            </div>
+        </div>
+        <div class="address">
+            Shop No. 1, Before Sai Vandana Brundavan, Chikkanayakahalli, Doddakannahalli, Bangalore - 560035.
+        </div>
+    </div>
+    <div class="bill-body">
+        <ag-grid-angular
+            [style.height.px]="gridHeight"
+            class="ag-theme-material"
+            [gridOptions]="gridOptions"
+            (gridReady)="onGridReady($event)"
+        >
+        </ag-grid-angular>
+    </div>
+    <div class="additional-details">
+        <div *ngFor="let item of additionalDetails" class="row">
+            <span class="label">{{ item.label }}</span>
+            <span class="value">{{ item.value }}</span>
+        </div>
+    </div>
+</div>
+<div class="footer">
+
+</div>
