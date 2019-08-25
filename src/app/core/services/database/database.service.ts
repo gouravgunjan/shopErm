@@ -56,6 +56,16 @@ export class DatabaseService {
                 }));
     }
 
+    public markBillAsComplete(billEntryId: number): Observable<boolean> {
+        return this.runQuery(`
+        update bill_repo set isComplete = true, endTime = current_timestamp() where billEntryId=${billEntryId};`
+        ).pipe(map(result => {
+                console.log(result);
+                return true;
+            })
+        );
+    }
+
     public getCompleteDetailsForBillEntry(billEntryId: number): Observable<BillEntry[]> {
         return this.runQuery(`select be.*, mr.menuCode, mr.menuPrice from
             bill_entry as be
@@ -122,7 +132,7 @@ export class DatabaseService {
     }
 
     public makeLoginEntry(userId: string): void {
-        this.runQuery(`INSERT INTO LOGIN_ENTRY VALUES('${userId}', current_timestamp())`).subscribe(() => {
+        this.runQuery(`INSERT INTO LOGIN_ENTRY (userId, loginTimeStamp) VALUES('${userId}', current_timestamp())`).subscribe(() => {
             console.log('Entry marked for user');
         }, error => {
             console.error(error);

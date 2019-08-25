@@ -18,6 +18,9 @@ import { MatInput } from '@angular/material/input';
 import { PromoBillEntry } from '../../shared/models/ui-models/promo-bill-entry';
 import * as moment from 'moment';
 import { remote } from 'electron';
+import { ElectronService } from '../../core/services';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { DialogComponent, DialogData } from '../../shared/components/dialog/dialog.component';
 
 @Component({
     selector: 'app-bill-entry',
@@ -65,17 +68,14 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
     constructor(private databaseService: DatabaseService,
         private whiteBoard: WhiteBoardService,
         private snackBar: MatSnackBar,
+        private electron: ElectronService,
+        private dialog: MatDialog,
         private sessionManager: SessionManager) {
     }
 
     ngOnInit(): void {
         this._initialiseGridOptions();
-        this.databaseService.refreshActiveBillList().subscribe(billListItems => {
-            this.runningBills = billListItems.sort((a, b) => a.billEntryId - b.billEntryId);
-            this.isActiveBillsLoading = false;
-            this._recalculateBillOverdue();
-            billListItems.forEach(item => this._updateTotalForBillEntry(item.billEntryId));
-        });
+        this.refreshAllBillList();
         this.databaseService.getCustomerTypesSortedByUsage().subscribe(customerTypes => {
             console.log('bill entries', customerTypes);
             this.billEntryTypes = customerTypes;
@@ -99,7 +99,6 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         );
         this.whiteBoard.billTotalChange.subscribe(billEntryId => {
             this._recalculateTotal();
-            this._updateTotalForBillEntry(billEntryId);
         });
 
         timer(60 * 1000, 60 * 1000).subscribe(() => {
@@ -126,6 +125,10 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         this.billDetailsTableEntries = null;
         this.appliedPromoCode = null;
         (<any>this.promoCodeInput).nativeElement.value = '';
+        if (!bill) {
+            this.billDetailsOverlayMessage = 'Please select a Bill to see details.';
+            return;
+        }
         this.runningBills.forEach(billEntry => {
             if (billEntry.billEntryId !== bill.billEntryId) {
                 billEntry.isSelected = false;
@@ -208,6 +211,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
                     data.id = _newBillId;
                     data.updating = false;
                     node.updateData(data);
+                    this.gridApi.redrawRows({rowNodes: [node]});
                     return;
                 }
             });
@@ -246,26 +250,64 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     completeAndPrint() {
-        const selectedBillEntryId = this.runningBills.find(item => item.isSelected).billEntryId;
-        const BrowserWindow = remote.BrowserWindow;
-        const childWin = new BrowserWindow({
-            width: 600,
-            height: 700,
-            alwaysOnTop: true,
-            center: true,
-            modal: true,
-            // minimizable: false,
-            maximizable: false,
-            webPreferences: {
-                nodeIntegration: true
+        const dialogRef = this.dialog.open(DialogComponent, <MatDialogConfig<DialogData>> {
+            minWidth: '300px',
+            data: {
+                message: 'Please press Complete to confirm.',
+                header: 'Confirm',
+                okButtonText: 'Complete'
             }
         });
+        dialogRef.componentInstance.data.okButtonAction = () => this.setOkButtonActionForCompleteAndPrint(dialogRef);
+    }
 
-        childWin.setMenu(null);
+    private setOkButtonActionForCompleteAndPrint(dialogRef: MatDialogRef<DialogComponent, any>) {
+        dialogRef.componentInstance.data.okButtonAction = undefined;
+        dialogRef.componentInstance.data.okButtonText = undefined;
+        dialogRef.componentInstance.data.header = 'Updating';
+        dialogRef.componentInstance.data.message = 'Updating Database';
+        dialogRef.componentInstance.data.cancelButtonDisabled = true;
+        dialogRef.disableClose = true;
+        this.databaseService.markBillAsComplete(this.billDetailsTableEntries[0].entryId).subscribe(isUpdateSuccess => {
+            if (isUpdateSuccess) {
+                dialogRef.componentInstance.data.header = 'Printing';
+                dialogRef.componentInstance.data.message = 'Printing the bill...';
+                this.electron.printBillDetails(this.billDetailsTableEntries,
+                    this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0).subscribe(success => {
+                    dialogRef.disableClose = false;
+                    if (success) {
+                        dialogRef.close();
+                        this.snackBar.open('Bill Printed!', 'Okay', { duration: 3000 });
+                        this.refreshAllBillList();
+                    } else {
+                        dialogRef.componentInstance.data.cancelButtonDisabled = false;
+                        dialogRef.componentInstance.data.message =
+                            'Something went wrong while printing the data. Please provide manual bill.';
+                        dialogRef.componentInstance.data.header = 'Error!';
+                        this.electron.showBilLDetails(this.billDetailsTableEntries,
+                            this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0);
+                        this.refreshAllBillList();
+                    }
+                });
+            } else {
+                dialogRef.componentInstance.data.okButtonAction = () => this.setOkButtonActionForCompleteAndPrint(dialogRef);
+                dialogRef.componentInstance.data.okButtonText = 'Retry Completing';
+                dialogRef.componentInstance.data.header = 'Retry';
+                dialogRef.componentInstance.data.message = 'Failed to update database, please retry to complete bill.';
+                dialogRef.componentInstance.data.cancelButtonDisabled = false;
+                dialogRef.disableClose = false;
+            }
+        });
+    }
 
-        childWin.loadURL(`http://localhost:4200/#/bill?billEntryId=${selectedBillEntryId}&discount=
-            ${this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0}`);
-        childWin.webContents.openDevTools();
+    private refreshAllBillList(): void {
+        this.databaseService.refreshActiveBillList().subscribe(billListItems => {
+            this.runningBills = billListItems.sort((a, b) => a.billEntryId - b.billEntryId);
+            this.isActiveBillsLoading = false;
+            this._recalculateBillOverdue();
+            billListItems.forEach(item => this._updateTotalForBillEntry(item.billEntryId));
+            this.showBillDetails(null);
+        });
     }
 
     private _checkAndSetNewBillButtonEnabled(customerType: string) {

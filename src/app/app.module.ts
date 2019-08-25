@@ -25,6 +25,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { BillPrintModule } from './bill-print-details/bill-print.module';
+import { SystemService } from './core/services/system.service';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -55,7 +56,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     })
   ],
-  providers: [DatabaseService, SessionManager],
+  providers: [DatabaseService, SessionManager, SystemService],
   entryComponents: [DialogComponent],
   bootstrap: [AppComponent]
 })

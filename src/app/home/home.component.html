@@ -22,6 +22,10 @@
   <button mat-icon-button (click)="logout()">
       <i class="material-icons">eject</i>
   </button>
+  
+  <button mat-stroked-button (click)="logoutWindows()">Logout Windows</button>
+  <button mat-stroked-button (click)="shutdownWindows()">Shutdown</button>
+  <button mat-stroked-button (click)="rebootWindows()">Reboot</button>
 </mat-toolbar>
 <div class="home-body">
     <app-bill-entry></app-bill-entry>

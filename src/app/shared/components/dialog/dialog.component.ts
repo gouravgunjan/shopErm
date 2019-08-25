@@ -8,6 +8,8 @@ export interface DialogData {
     okButtonAction?: Function;
     cancelButtonText?: string;
     cancelButtonAction?: Function;
+    cancelButtonDisabled?: boolean;
+    okButtonDisabled?: boolean;
 }
 
 @Component({

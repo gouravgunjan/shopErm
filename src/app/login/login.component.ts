@@ -6,6 +6,7 @@ import { DialogComponent, DialogData } from '../shared/components/dialog/dialog.
 import { Router } from '@angular/router';
 import { ConnectionResponse } from '../shared/models/session/connection-response';
 import * as loginMessages from '../../assets/json/login-messages.json';
+import { SystemService } from '../core/services/system.service';
 
 @Component({
     selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginComponent {
 
     constructor(private sessionManager: SessionManager,
             private dialog: MatDialog,
+            private systemService: SystemService,
             private router: Router) { }
 
     public onLoginClick(): void {
@@ -33,9 +35,6 @@ export class LoginComponent {
                         header: loginMessages.headerMessage
                     }
                 });
-                dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
-                    console.log('message closed!');
-                });
             } else {
                 // move to home
                 this.router.navigate(['/home']);
@@ -44,4 +43,7 @@ export class LoginComponent {
         });
     }
 
+    onLogoutClick() {
+        this.systemService.logoutWindows();
+    }
 }

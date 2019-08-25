@@ -19,6 +19,7 @@ import { BillDetailsActionGridComponent } from './bill-entry/grid-components/bil
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { WhiteBoardService } from '../core/services/whiteboard.service';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [HomeComponent,
@@ -35,6 +36,7 @@ import { WhiteBoardService } from '../core/services/whiteboard.service';
       MatFormFieldModule,
       MatInputModule,
       MatMenuModule,
+      MatDialogModule,
       MatListModule,
       MatSnackBarModule,
       MatAutocompleteModule,

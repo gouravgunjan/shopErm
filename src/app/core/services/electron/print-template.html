@@ -1,0 +1,89 @@
+<html>
+    <body>
+        <div class="header">
+            <span class="kitchen-name">Noco Kitchen</span>
+            <div class="additonal-details">
+                <span>Bill No. ${billNumber}</span>
+                <span>Date: ${formattedDate}</span>
+            </div>
+            <span>----------------------------------------------------------------</span>
+        </div>
+        <table>
+            <tr>
+                <th class="item">Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+            </tr>
+            <tr>
+                <td colspan="3">----------------------------------------------------------------</td>
+            </tr>
+            ${stringItemRows}
+            <tr>
+                <td class="seperator" colspan="3">----------------------------------------------------------------</td>
+            </tr>
+            <tr>
+                <td class="item data" colspan="2">SGST (2.5%)</td>
+                <td class="data">${sgstValue}</td>
+            </tr>
+            <tr>
+                <td class="item data" colspan="2">CGST (2.5%)</td>
+                <td class="data">${cgstValue}</td>
+            </tr>
+            ${discountRow}
+            <tr>
+                <td colspan="3">----------------------------------------------------------------</td>
+            </tr>
+            <tr>
+                <td class="item data" colspan="2">Total</td>
+                <td class="data">Rs. ${totalValue}</td>
+            </tr>
+            <tr>
+                <td colspan="3">----------------------------------------------------------------</td>
+            </tr>
+        </table>
+    </body>
+    <style>
+        @page {
+            size: auto;
+            margin-top:0mm;
+            margin-left: 1mm;
+            margin-right: 1mm;
+            margin-bottom: 15mm;
+            size: portrait;
+        }
+        body {
+            width: 242px;
+        }
+        body *{
+            font-size: 11px;
+        }
+        .kitchen-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-flow: column;
+        }
+        .additonal-details {
+            display: flex;
+            width: calc(100% - 10px);
+            justify-content: space-between;
+            margin-left: 10px;
+            padding-right: 10px;
+        }
+        th {
+            text-align: left;
+            padding-left: 6px;
+        }
+        td.item {
+            width: 150px;
+        }
+        td.data {
+            padding-left: 6px;
+        }
+    </style>
+</html>

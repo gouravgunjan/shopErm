@@ -7,7 +7,7 @@
     </p>
 </div>
 <div mat-dialog-actions>
-    <button mat-button *ngIf="data.okButtonAction" (click)="data.okButtonAction()">{{ data.okButtonText }}</button>
-    <button mat-button *ngIf="data.cancelButtonAction" (click)="data.cancelButtonAction()">{{ data.cancelButtonText }}</button>
+    <button mat-button *ngIf="data.okButtonAction" [disabled]='data.okButtonDisabled' (click)="data.okButtonAction()">{{ data.okButtonText }}</button>
+    <button mat-button *ngIf="data.cancelButtonAction" [disabled]='data.cancelButtonDisabled' (click)="data.cancelButtonAction()">{{ data.cancelButtonText }}</button>
     <button mat-button *ngIf="!data.cancelButtonAction" matDialogClose>Close</button>
 </div>

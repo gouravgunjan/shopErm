@@ -4,6 +4,8 @@ import { BillEntry } from '../shared/models/database/bill-entry';
 import { GridOptions, ColDef, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { BillDetailItem } from '../shared/models/ui-models/bill-detail-item';
 import { TotalCal } from '../shared/utils/total-cal.util';
+import { ElectronService } from '../core/services';
+import { isNgTemplate } from '@angular/compiler';
 
 
 @Component({
@@ -33,7 +35,7 @@ export class BillPrintDetailsComponent implements OnInit {
     gridHeight: number;
     gridOptions: GridOptions;
 
-    constructor(private databaseService: DatabaseService) { }
+    constructor(private databaseService: DatabaseService, private electron: ElectronService) { }
 
     ngOnInit(): void {
         const billEntryId = +this.getQueryStringValue('billEntryId');
@@ -53,6 +55,10 @@ export class BillPrintDetailsComponent implements OnInit {
         if (this.billEntryDetails) {
             this._setBillDetails();
         }
+    }
+
+    printBill() {
+        this.electron.printBillDetails(this.billEntryDetails, this.discount);
     }
 
     private _setBillDetails() {
@@ -95,7 +101,7 @@ export class BillPrintDetailsComponent implements OnInit {
         if (this.discount > 0) {
             this.additionalDetails.unshift({
                 label: `Discount (${this.discount}%):`,
-                value: this.discount
+                value: additionalDetails.discount
             });
         }
     }

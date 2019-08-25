@@ -52,9 +52,7 @@ export class QuantityGridComponent implements ICellRendererAngularComp {
     }
 
     refresh(params: any): boolean {
-        console.log('refresh called in quantity');
-        this.updating = params.data.updating;
-        return true;
+        return false;
     }
 
     agInit(params: ICellRendererParams): void {

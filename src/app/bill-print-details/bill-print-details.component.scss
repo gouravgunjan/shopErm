@@ -1,3 +1,11 @@
+@page {
+  size: auto;
+  margin-top:10mm;
+  margin-left: 1mm;
+  margin-right: 1mm;
+  margin-bottom: 10mm;
+  size: portrait;
+}
 @media print {
     * {
       visibility: hidden;
