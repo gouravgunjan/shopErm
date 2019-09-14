@@ -139,7 +139,7 @@ export class DatabaseService {
         });
     }
 
-    private runQuery(query: string): Observable<any> {
+    public runQuery(query: string): Observable<any> {
         const conn = this.getConnection();
         const result = new Subject<ConnectionResponse<any>>();
         conn.connect(connError => {

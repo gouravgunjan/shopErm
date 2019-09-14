@@ -1,0 +1,23 @@
+<div class="top-details">
+    <mat-card>
+        <mat-card-title color="primary">Total Revenue</mat-card-title>
+        <mat-card-content>
+            <button mat-stroked-button color="primary" 
+            [disabled]="totals.isLoading === true"
+            (click)="getTotals()">Get Data</button>
+            <div *ngIf="totals.isLoaded === true" class="results">
+                <div>Today: {{ totals.revenue.today }}</div>
+                <div>Week: {{ totals.revenue.weekly }}</div>
+                <div>Month: {{ totals.revenue.monthly }}</div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="charts">
+    <x-chartist class="todays-updates"
+        [data]="chartDetails"
+        [type]="chartType"
+        (initialized)="chartInitialized($event)"
+    ></x-chartist>
+</div>
+<div class="sql-runner"></div>

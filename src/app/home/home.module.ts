@@ -20,18 +20,23 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import { WhiteBoardService } from '../core/services/whiteboard.service';
 import { MatDialogModule } from '@angular/material/dialog';
+import { AdminReportComponent } from './admin-reports/admin-report.component';
+import { ChartistModule } from 'ng-chartist';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   declarations: [HomeComponent,
     BillEntryComponent,
     QuantityGridComponent,
-    BillDetailsActionGridComponent
+    BillDetailsActionGridComponent,
+    AdminReportComponent
   ],
   imports: [CommonModule,
       SharedModule,
       HomeRoutingModule,
       FormsModule,
       ReactiveFormsModule,
+      MatCardModule,
       MatButtonModule,
       MatFormFieldModule,
       MatInputModule,
@@ -46,7 +51,9 @@ import { MatDialogModule } from '@angular/material/dialog';
       ]),
       MatProgressBarModule,
       MatProgressSpinnerModule,
-      MatToolbarModule],
+      MatToolbarModule,
+      ChartistModule
+    ],
     providers: [WhiteBoardService]
 })
 export class HomeModule {}

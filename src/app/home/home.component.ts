@@ -10,11 +10,19 @@ import { SystemService } from '../core/services/system.service';
 })
 export class HomeComponent implements OnInit {
 
+  public currentView: number;
+
+  public readonly VIEWS = {
+    billEntry: 0,
+    adminReports: 1
+  };
+
   constructor(private databaseService: DatabaseService,
     private sysService: SystemService,
     private router: Router) { }
 
   async ngOnInit() {
+    this.currentView = this.VIEWS.billEntry;
   }
 
   logout() {
@@ -31,5 +39,11 @@ export class HomeComponent implements OnInit {
 
   rebootWindows() {
     this.sysService.rebootWindows();
+  }
+
+  changeView(newView: number) {
+    if (this.currentView !== newView) {
+      this.currentView = newView;
+    }
   }
 }

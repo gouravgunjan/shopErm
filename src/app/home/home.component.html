@@ -4,11 +4,11 @@
     <i class="material-icons">menu</i>
   </button>
   <mat-menu #menu="matMenu">
-      <button mat-menu-item>
-        <span>Redial</span>
+      <button mat-menu-item (click)="changeView(VIEWS.billEntry)">
+        <span>Bill Entry</span>
       </button>
-      <button mat-menu-item disabled>
-        <span>Check voice mail</span>
+      <button mat-menu-item (click)="changeView(VIEWS.adminReports)">
+        <span>Admin Reports</span>
       </button>
       <button mat-menu-item>
         <span>Disable alerts</span>
@@ -28,5 +28,6 @@
   <button mat-stroked-button (click)="rebootWindows()">Reboot</button>
 </mat-toolbar>
 <div class="home-body">
-    <app-bill-entry></app-bill-entry>
+    <app-bill-entry *ngIf="currentView === VIEWS.billEntry"></app-bill-entry>
+    <app-admin-report *ngIf="currentView === VIEWS.adminReports"></app-admin-report>
 </div>
