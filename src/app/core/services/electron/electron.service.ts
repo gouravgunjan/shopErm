@@ -65,6 +65,7 @@ export class ElectronService {
           show: false
         });
         win.loadFile('C:/temp/print.html');
+        // win.webContents.openDevTools();
         win.webContents.on('did-finish-load', () => {
           win.webContents.print({}, success => {
             result.next(true);

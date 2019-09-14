@@ -40,7 +40,7 @@ export class PrintTemplateProcessor {
                                 <span>Bill No. ${billNumber}</span>
                                 <span>Date: ${formattedDate}</span>
                             </div>
-                            <span>----------------------------------------------------------------</span>
+                            <span>---------------------------------------------------------------------------------</span>
                         </div>
                         <table>
                             <tr>
@@ -49,11 +49,11 @@ export class PrintTemplateProcessor {
                                 <th>Price</th>
                             </tr>
                             <tr>
-                                <td colspan="3">----------------------------------------------------------------</td>
+                                <td colspan="3">---------------------------------------------------------------------------------</td>
                             </tr>
                             ${stringItemRows}
                             <tr>
-                                <td class="seperator" colspan="3">----------------------------------------------------------------</td>
+                                <td class="seperator" colspan="3">---------------------------------------------------------------------------------</td>
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">SGST (2.5%)</td>
@@ -65,16 +65,18 @@ export class PrintTemplateProcessor {
                             </tr>
                             ${discountRow}
                             <tr>
-                                <td colspan="3">----------------------------------------------------------------</td>
+                                <td colspan="3">---------------------------------------------------------------------------------</td>
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">Total</td>
                                 <td class="data">Rs. ${totalValue}</td>
                             </tr>
                             <tr>
-                                <td colspan="3">----------------------------------------------------------------</td>
+                                <td colspan="3">---------------------------------------------------------------------------------</td>
                             </tr>
                         </table>
+                        <br />
+                        <br />.
                     </body>
                     <style>
                         @page {
@@ -89,10 +91,12 @@ export class PrintTemplateProcessor {
                             width: 242px;
                         }
                         body *{
-                            font-size: 11px;
+                            font-family: 'Franklin Gothic Medium', 
+                            'Arial Narrow', Arial, sans-serif;
+                            font-size: 12px;
                         }
                         .kitchen-name {
-                            font-size: 14px;
+                            font-size: 16px;
                             font-weight: bold;
                             margin-bottom: 10px;
                         }
@@ -114,7 +118,7 @@ export class PrintTemplateProcessor {
                             padding-left: 6px;
                         }
                         td.item {
-                            width: 150px;
+                            width: 144px;
                         }
                         td.data {
                             padding-left: 6px;
