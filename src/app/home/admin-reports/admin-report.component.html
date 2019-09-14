@@ -1,23 +1,55 @@
 <div class="top-details">
     <mat-card>
-        <mat-card-title color="primary">Total Revenue</mat-card-title>
+        <mat-card-title color="primary">Total Revenue and Orders</mat-card-title>
         <mat-card-content>
-            <button mat-stroked-button color="primary" 
-            [disabled]="totals.isLoading === true"
-            (click)="getTotals()">Get Data</button>
-            <div *ngIf="totals.isLoaded === true" class="results">
-                <div>Today: {{ totals.revenue.today }}</div>
-                <div>Week: {{ totals.revenue.weekly }}</div>
-                <div>Month: {{ totals.revenue.monthly }}</div>
+            <div *ngIf="totals.isLoaded === true" class="revenue">
+                <!-- <div class="title">Revenue</div> -->
+                <div class="result-body">
+                    <div>
+                        <span class="label">Today </span>
+                        <span class="result">Rs. {{ totals.revenue.today }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Week </span>
+                        <span class="result">Rs. {{ totals.revenue.weekly }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Month </span>
+                        <span class="result">Rs. {{ totals.revenue.monthly }}</span>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="totals.isLoaded === true" class="orders">
+                <!-- <div class="title">Total Orders</div> -->
+                <div class="result-body">
+                    <div>
+                        <span class="label">Orders Today </span>
+                        <span class="result">{{ totals.numberOfOrders.today }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Week </span>
+                        <span class="result">{{ totals.numberOfOrders.weekly }}</span>
+                    </div>
+                    <div>
+                        <span class="label">Month </span>
+                        <span class="result">{{ totals.numberOfOrders.monthly }}</span>
+                    </div>
+                </div>
             </div>
         </mat-card-content>
     </mat-card>
 </div>
-<div class="charts">
-    <x-chartist class="todays-updates"
-        [data]="chartDetails"
-        [type]="chartType"
-        (initialized)="chartInitialized($event)"
-    ></x-chartist>
-</div>
+<mat-card>
+    <mat-card-title color="primary">Hourly Average</mat-card-title>
+    <mat-card-content>
+        <div class="charts">
+            <x-chartist class="todays-updates"
+                [data]="chartDetails"
+                [type]="chartType"
+                (initialized)="chartInitialized($event)"
+            ></x-chartist>
+        </div>
+    </mat-card-content>
+</mat-card>
+
 <div class="sql-runner"></div>

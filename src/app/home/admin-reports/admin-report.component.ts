@@ -14,10 +14,25 @@ export class AdminReportComponent implements OnInit {
 
     chartDetails: IChartistData = {
         labels: [
-            '9:00 AM', '10:00 AM', '11:00 AM', '12:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
+            '9 AM',
+            '10 AM',
+            '11 AM',
+            '12 AM',
+            '1 PM',
+            '2 PM',
+            '3 PM',
+            '4 PM',
+            '5 PM',
+            '6 PM',
+            '7 PM',
+            '8 PM',
+            '9 PM',
+            '10 PM'
         ],
         series: [
-            [90, 20, 0, 115, 130, 665, 30, 853]
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
     };
     chartType: ChartType = 'Line';
@@ -47,8 +62,10 @@ export class AdminReportComponent implements OnInit {
             lastThreeDaysEarning: -1,
             lastWeekEarning: -1,
             lastMonthEarning: -1
-        }
-    }
+        },
+        isLoading: false,
+        isLoaded: false
+    };
 
     yesterdayEarnedByThisTime: -1;
 
@@ -68,69 +85,75 @@ export class AdminReportComponent implements OnInit {
 
     ngOnInit(): void {
         // get chart data
-        this.databaseService.runQuery( `
-        select date_format(startTime, '%h:00') as timeInHour, SUM(mr.menuPrice * be.quantity) as totalPrices from bill_repo as br
-        join bill_entry as be on be.billEntryId=br.billEntryId
-        join menu_repo as mr on mr.menuItem = be.menuItem
-        where startTime >= '2019-08-10'
-        group by timeInHour;`).subscribe(result => {
-            // transform the result into data
-            this.chartDetails.labels = [];
-            const tempLabels: string[] = [];
-            const tempTotals: number[] = [];
-            result.forEach((row: any) => {
-                tempLabels.push(<string> row.timeInHour);
-                tempTotals.push(<number> row.totalPrices);
-            });
-            this.chartDetails = {
-                labels: tempLabels,
-                series: [tempTotals]
-            };
-            // this.chartDetails.labels = tempLabels;
-            // this.chartDetails.series = [tempTotals];
-            console.log(result);
-        });
+        this.getChartValues();
+        this.getTotals();
     }
 
     chartInitialized(params: ChartInterfaces) {
         console.log(params);
     }
 
+    getChartValues() {
+        this.databaseService.runQuery(this.getChartDetailsQueryForDate('2019-08-10')).subscribe(result => {
+            // transform the result into data
+            const tempCharDetails = Object.assign({}, this.chartDetails);
+            result.forEach((row: any) => {
+                const indexOfLableFound = (<string[]> tempCharDetails.labels).indexOf(row.timeInHour);
+                if (indexOfLableFound > -1) {
+                    (<number[]>tempCharDetails.series[0]).splice(indexOfLableFound, 1, <number> row.totalPrices);
+                }
+            });
+            this.chartDetails = tempCharDetails;
+        });
+        this.databaseService.runQuery(this.getChartDetailsQueryForDate(moment().subtract(7, 'd').format(this.DATE_FORMAT_SQL),
+        moment().format(this.DATE_FORMAT_SQL), 6)).subscribe(result => {
+            // transform the result into data
+            const tempCharDetails = Object.assign({}, this.chartDetails);
+            result.forEach((row: any) => {
+                const indexOfLableFound = (<string[]> tempCharDetails.labels).indexOf(row.timeInHour);
+                if (indexOfLableFound > -1) {
+                    (<number[]>tempCharDetails.series[1]).splice(indexOfLableFound, 1, <number> row.totalPrices);
+                }
+            });
+            this.chartDetails = tempCharDetails;
+        });
+        this.databaseService.runQuery(this.getChartDetailsQueryForDate(moment().subtract(30, 'd').format(this.DATE_FORMAT_SQL),
+        moment().format(this.DATE_FORMAT_SQL), 29)).subscribe(result => {
+            // transform the result into data
+            const tempCharDetails = Object.assign({}, this.chartDetails);
+            result.forEach((row: any) => {
+                const indexOfLableFound = (<string[]> tempCharDetails.labels).indexOf(row.timeInHour);
+                if (indexOfLableFound > -1) {
+                    (<number[]>tempCharDetails.series[1]).splice(indexOfLableFound, 1, <number> row.totalPrices);
+                }
+            });
+            this.chartDetails = tempCharDetails;
+        });
+    }
+
     getTotals(): void {
         this.totals.isLoading = true;
-        // totals = {
-        //     revenue: {
-        //         today: -1,
-        //         weekly: -1,
-        //         monthly: -1
-        //     },
-        //     numberOfOrders: {
-        //         today: -1,
-        //         weekly: -1,
-        //         monthly: -1
-        //     }
-        // };
         const totals = Object.assign({}, this.totals);
         const loadedState = {
             today: false,
             weekly: false,
             monthly: false
         };
-        this.databaseService.runQuery(this.getTotalAndOrdersForDate(moment().format(this.DATE_FORMAT_SQL))).subscribe(res => {
+        this.databaseService.runQuery(this.getTotalAndOrdersQueryForDate(moment().format(this.DATE_FORMAT_SQL))).subscribe(res => {
             totals.revenue.today = (res[0].revenue) ? res[0].revenue : 0;
             totals.numberOfOrders.today = res[0].totalOrder;
             console.log('totals', totals);
             loadedState.today = true;
             this.checkAndSetTotals(loadedState, totals);
         });
-        this.databaseService.runQuery(this.getTotalAndOrdersForDate(moment().subtract(7, 'd').format(this.DATE_FORMAT_SQL),
+        this.databaseService.runQuery(this.getTotalAndOrdersQueryForDate(moment().subtract(7, 'd').format(this.DATE_FORMAT_SQL),
             moment().format(this.DATE_FORMAT_SQL))).subscribe(res => {
                 totals.revenue.weekly = (res[0].revenue) ? res[0].revenue : 0;
                 totals.numberOfOrders.weekly = res[0].totalOrder;
                 loadedState.weekly = true;
                 this.checkAndSetTotals(loadedState, totals);
         });
-        this.databaseService.runQuery(this.getTotalAndOrdersForDate(moment().subtract(30, 'd').format(this.DATE_FORMAT_SQL),
+        this.databaseService.runQuery(this.getTotalAndOrdersQueryForDate(moment().subtract(30, 'd').format(this.DATE_FORMAT_SQL),
             moment().format(this.DATE_FORMAT_SQL))).subscribe(res => {
                 totals.revenue.monthly = (res[0].revenue) ? res[0].revenue : 0;
                 totals.numberOfOrders.monthly = res[0].totalOrder;
@@ -149,11 +172,24 @@ export class AdminReportComponent implements OnInit {
             }
     }
 
-    private getTotalAndOrdersForDate(startDate: string, endDate?: string): string {
+    private getTotalAndOrdersQueryForDate(startDate: string, endDate?: string): string {
+        const endDateQuery = endDate ? ` and DATE(startTime) <= '${endDate}'` : '';
         const query = `select SUM(mr.menuPrice * be.quantity) as revenue, count(br.billEntryId) as totalOrder from bill_repo as br
         join bill_entry as be on be.billEntryId=br.billEntryId
         join menu_repo as mr on mr.menuItem = be.menuItem
-        where DATE(startTime) ${endDate ? '>' : ''}= '${startDate}'`;
-        return endDate ? query + ` and DATE(startTime) <= '${endDate}'` : query;
+        where DATE(startTime) ${endDate ? '>' : ''}= '${startDate}'${endDateQuery}
+        and br.isComplete=true`;
+        return ;
+    }
+
+    private getChartDetailsQueryForDate(startDate: string, endDate?: string, numberOfDays?: number): string {
+        const endDateExtraQuery = endDate ? ` and DATE(startTime) <= '${endDate}'` : '';
+        return `select date_format(startTime, '%l %p') as timeInHour,
+        SUM(mr.menuPrice * be.quantity)${numberOfDays ? '/' + numberOfDays : ''} as totalPrices from bill_repo as br
+        join bill_entry as be on be.billEntryId=br.billEntryId
+        join menu_repo as mr on mr.menuItem = be.menuItem
+        where DATE(startTime) ${endDate ? '>' : ''}= '${startDate}' ${endDateExtraQuery}
+        and br.isComplete=true
+        group by timeInHour;`;
     }
 }
