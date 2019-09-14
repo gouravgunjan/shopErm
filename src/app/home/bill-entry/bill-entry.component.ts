@@ -200,6 +200,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
             menuItem: selectedValue.menuItem
         };
         const listItem = this._getProcessedBillDetailRow(newBillEntry);
+        this.billDetailsTableEntries.push(listItem);
         listItem.updating = true;
         this.gridApi.updateRowData({
             add: [listItem]
