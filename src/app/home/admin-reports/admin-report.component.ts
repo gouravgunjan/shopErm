@@ -94,7 +94,7 @@ export class AdminReportComponent implements OnInit {
     }
 
     getChartValues() {
-        this.databaseService.runQuery(this.getChartDetailsQueryForDate('2019-08-10')).subscribe(result => {
+        this.databaseService.runQuery(this.getChartDetailsQueryForDate(moment().format(this.DATE_FORMAT_SQL))).subscribe(result => {
             // transform the result into data
             const tempCharDetails = Object.assign({}, this.chartDetails);
             result.forEach((row: any) => {
@@ -174,12 +174,11 @@ export class AdminReportComponent implements OnInit {
 
     private getTotalAndOrdersQueryForDate(startDate: string, endDate?: string): string {
         const endDateQuery = endDate ? ` and DATE(startTime) <= '${endDate}'` : '';
-        const query = `select SUM(mr.menuPrice * be.quantity) as revenue, count(br.billEntryId) as totalOrder from bill_repo as br
+        return `select SUM(mr.menuPrice * be.quantity) as revenue, count(br.billEntryId) as totalOrder from bill_repo as br
         join bill_entry as be on be.billEntryId=br.billEntryId
         join menu_repo as mr on mr.menuItem = be.menuItem
         where DATE(startTime) ${endDate ? '>' : ''}= '${startDate}'${endDateQuery}
         and br.isComplete=true`;
-        return ;
     }
 
     private getChartDetailsQueryForDate(startDate: string, endDate?: string, numberOfDays?: number): string {

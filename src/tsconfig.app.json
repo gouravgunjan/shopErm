@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "resolveJsonModule": true,
+    "experimentalDecorators": true,
     "module": "es2015",
     "baseUrl": "",
     "types": [
