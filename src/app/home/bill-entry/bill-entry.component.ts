@@ -21,6 +21,7 @@ import { remote } from 'electron';
 import { ElectronService } from '../../core/services';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { DialogComponent, DialogData } from '../../shared/components/dialog/dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-bill-entry',
@@ -70,7 +71,8 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         private snackBar: MatSnackBar,
         private electron: ElectronService,
         private dialog: MatDialog,
-        private sessionManager: SessionManager) {
+        private sessionManager: SessionManager,
+        private router: Router) {
     }
 
     ngOnInit(): void {
@@ -99,6 +101,14 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
         );
         this.whiteBoard.billTotalChange.subscribe(billEntryId => {
             this._recalculateTotal();
+        });
+        this.whiteBoard.menuItemDelete.subscribe(deletedMenuItemId => {
+            if (this.billDetailsTableEntries) {
+                const deleteIndex = this.billDetailsTableEntries.findIndex(entryItem => entryItem.id === deletedMenuItemId);
+                if (deleteIndex > -1) {
+                    this.billDetailsTableEntries.splice(deleteIndex, 1);
+                }
+            }
         });
 
         timer(60 * 1000, 60 * 1000).subscribe(() => {
@@ -216,6 +226,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
                     return;
                 }
             });
+            this._recalculateTotal();
         });
     }
 
@@ -228,7 +239,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     newBillEntryClick(): void {
-        if (this.newBillCustomerType !== '') {
+        if (this.newBillCustomerType !== '' && this.sessionManager.entryUser) {
             this.newBillEntryButtonEnabled = false;
             this.isActiveBillsLoading = true;
             this.databaseService.addNewBillEntry(this.newBillCustomerType, this.sessionManager.entryUser).subscribe(entryId => {
@@ -247,6 +258,49 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.showBillDetails(newBillEntry);
                 this.isActiveBillsLoading = false;
             });
+        } else if (!this.sessionManager.entryUser) {
+            const ref = this.dialog.open(DialogComponent, <MatDialogConfig<DialogData>> {
+                minWidth: '300px',
+                data: {
+                    message: 'Entry user not found. Please login again.',
+                    header: 'Confirm',
+                    okButtonText: 'Re-login'
+                }
+            });
+            ref.componentInstance.data.okButtonAction = () => {
+                this.router.navigate(['/login']);
+            };
+        }
+    }
+
+    deleteBill() {
+        const ref = this.dialog.open(DialogComponent, <MatDialogConfig<DialogData>> {
+            minWidth: '300px',
+            data: {
+                message: 'Are you sure you want to delete the bill. This WILL NOT print or complete the bill.',
+                header: 'Confirm',
+                okButtonText: 'Complete'
+            }
+        });
+        ref.componentInstance.data.okButtonAction = () => {
+            ref.componentInstance.data.okButtonAction = undefined;
+            ref.componentInstance.data.okButtonText = undefined;
+            ref.componentInstance.data.header = 'Updating';
+            ref.componentInstance.data.message = 'Updating Database';
+            ref.componentInstance.data.cancelButtonDisabled = true;
+            this.databaseService.deleteBill(this.runningBills.find(item => item.isSelected).billEntryId).subscribe(deleted => {
+                if (deleted) {
+                    ref.close();
+                    this.showBillDetails(undefined);
+                    this.refreshAllBillList();
+                } else {
+                    ref.componentInstance.data.header = 'Deletion Failed!';
+                    ref.componentInstance.data.message = `Please close this message and try again.
+                        If the problem contnues, logout and login again`;
+                    ref.componentInstance.data.cancelButtonDisabled = false;
+                }
+            });
+
         }
     }
 
@@ -274,7 +328,8 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
                 dialogRef.componentInstance.data.header = 'Printing';
                 dialogRef.componentInstance.data.message = 'Printing the bill...';
                 this.electron.printBillDetails(this.billDetailsTableEntries,
-                    this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0).subscribe(success => {
+                    this.appliedPromoCode ? this.appliedPromoCode.promoDiscountPercent : 0,
+                    this.runningBills.find(bill => bill.isSelected).customerType).subscribe(success => {
                     dialogRef.disableClose = false;
                     if (success) {
                         dialogRef.close();
@@ -402,13 +457,14 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
             this.gridApi.forEachNode(node => {
                 totalPrice += node.data.price;
             });
+            let newTotalPrice = totalPrice > 0 ? totalPrice * 0.05 + totalPrice : 0;
             this._updateTotalForBillEntry(billEntry.billEntryId);
             if (this.appliedPromoCode && totalPrice > 0) {
-                totalPrice -= totalPrice * this.appliedPromoCode.promoDiscountPercent / 100;
+                newTotalPrice -= newTotalPrice * this.appliedPromoCode.promoDiscountPercent / 100;
             }
             this.sgstTotal = 0.025 * totalPrice;
             this.cgstTotal = 0.025 * totalPrice;
-            this.total = totalPrice;
+            this.total = newTotalPrice;
         }
     }
 

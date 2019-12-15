@@ -48,6 +48,7 @@ export class DatabaseService {
                 map(result =>  {
                     let total: number = result[0].totalPrice;
                     if (total > 0) {
+                        total += total * 0.05;
                         if (result[0].promoDiscountPercent) {
                             total -= total * result[0].promoDiscountPercent / 100;
                         }
@@ -109,6 +110,12 @@ export class DatabaseService {
         return this.runQuery(`call applyPromoCode('${promoCode}', ${billEntryId})`).pipe(map(queryRes => {
             console.log('apply promo code: ', queryRes);
             return queryRes[0][0].result;
+        }));
+    }
+
+    public deleteBill(billEntryId: number): Observable<boolean> {
+        return this.runQuery(`delete from bill_repo where billEntryId=${billEntryId}`).pipe(map(result => {
+            return true;
         }));
     }
 

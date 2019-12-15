@@ -40,7 +40,7 @@ export class ElectronService {
   }
 
   showBilLDetails(billEntries: BillDetailItem[], discount: number) {
-    const htmlBody = PrintTemplateProcessor.getCompleteBillHtmlString(billEntries, discount);
+    const htmlBody = PrintTemplateProcessor.getCompleteBillHtmlString(billEntries, discount, '');
     this.fs.writeFile('C:/temp/print.html', htmlBody,
     (error) => {
       if (error) {
@@ -52,9 +52,9 @@ export class ElectronService {
     });
   }
 
-  printBillDetails(billEntries: BillDetailItem[], discount: number): Observable<boolean> {
+  printBillDetails(billEntries: BillDetailItem[], discount: number, customerType: string): Observable<boolean> {
     const result = new Subject<boolean>();
-    const htmlBody = PrintTemplateProcessor.getCompleteBillHtmlString(billEntries, discount);
+    const htmlBody = PrintTemplateProcessor.getCompleteBillHtmlString(billEntries, discount, customerType);
     this.fs.writeFile('C:/temp/print.html', htmlBody,
     (error) => {
       if (error) {
@@ -62,7 +62,7 @@ export class ElectronService {
         result.next(false);
       } else {
         const win = new this.remote.BrowserWindow({
-          show: false
+          // show: false
         });
         win.loadFile('C:/temp/print.html');
         // win.webContents.openDevTools();

@@ -40,6 +40,7 @@ export class BillDetailsActionGridComponent implements ICellRendererAngularComp 
                 remove: [data]
             });
             this.whiteBoard.notifyBillTotalChange(data.entryId);
+            this.whiteBoard.notifyItemDeletedFromBill(data.id);
         });
     }
 

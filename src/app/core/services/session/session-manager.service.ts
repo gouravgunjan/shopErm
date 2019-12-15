@@ -29,6 +29,6 @@ export class SessionManager {
     }
 
     public get entryUser(): string {
-        return this.sessionInfo.userName;
+        return this.sessionInfo ? this.sessionInfo.userName : undefined;
     }
 }

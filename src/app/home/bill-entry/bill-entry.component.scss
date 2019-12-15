@@ -61,14 +61,23 @@
             height: calc(100% - 150px);
             width: calc(100% - 10px);
         }
-        h3 {
-            font-size: 14px;
-            font-weight: 500;
-            margin:0;
-            height: 48px;
-            line-height: 16px;
-            color: rgba(0,0,0,.54);
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            h3 {
+                font-size: 14px;
+                font-weight: 500;
+                margin:0;
+                line-height: 16px;
+                color: rgba(0,0,0,.54);
+                display: inline-block;
+            }
+            button {
+                height: 35px;
+            }
         }
+        
         .keyboard-entry-form {
             margin-left: 16px;
             .item-entry {

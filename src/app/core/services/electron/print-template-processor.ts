@@ -23,7 +23,7 @@ export class PrintTemplateProcessor {
         return '';
     }
 
-    static getCompleteBillHtmlString(billDetailRows: BillDetailItem[], discount: number): string {
+    static getCompleteBillHtmlString(billDetailRows: BillDetailItem[], discount: number, customer: string): string {
         const additionalDetails = TotalCal.calcTotalFromDetailItems(billDetailRows, discount);
         const stringItemRows = this.getItemRowsString(billDetailRows);
         const sgstValue = additionalDetails.sgst;
@@ -40,6 +40,11 @@ export class PrintTemplateProcessor {
                                 <span>Bill No. ${billNumber}</span>
                                 <span>Date: ${formattedDate}</span>
                             </div>
+                            <div class="other-details">
+                            GST # - <br/>
+                            Call us on - <br/>
+                            Customer - ${customer}
+                            </div>
                             <span>---------------------------------------------------------------------------------</span>
                         </div>
                         <table>
@@ -54,6 +59,10 @@ export class PrintTemplateProcessor {
                             ${stringItemRows}
                             <tr>
                                 <td class="seperator" colspan="3">---------------------------------------------------------------------------------</td>
+                            </tr>
+                            <tr>
+                                <td class="item data" colspan="2">Total (excluding taxes)</td>
+                                <td class="data">${additionalDetails.totalWithoutGst}</td>
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">SGST (2.5%)</td>
@@ -91,7 +100,7 @@ export class PrintTemplateProcessor {
                             width: 242px;
                         }
                         body *{
-                            font-family: 'Franklin Gothic Medium', 
+                            font-family: 'Franklin Gothic Medium',
                             'Arial Narrow', Arial, sans-serif;
                             font-size: 12px;
                         }

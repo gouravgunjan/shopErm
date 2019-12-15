@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DatabaseService } from '../core/services/database/database.service';
 import { Router } from '@angular/router';
 import { SystemService } from '../core/services/system.service';
+import { SessionManager } from '../core/services/session/session-manager.service';
 
 @Component({
   selector: 'app-home',
@@ -11,6 +12,7 @@ import { SystemService } from '../core/services/system.service';
 export class HomeComponent implements OnInit {
 
   public currentView: number;
+  public entryUser: string;
 
   public readonly VIEWS = {
     billEntry: 0,
@@ -19,10 +21,12 @@ export class HomeComponent implements OnInit {
 
   constructor(private databaseService: DatabaseService,
     private sysService: SystemService,
+    private sessionManager: SessionManager,
     private router: Router) { }
 
   async ngOnInit() {
     this.currentView = this.VIEWS.billEntry;
+    this.entryUser = this.sessionManager.entryUser;
   }
 
   logout() {

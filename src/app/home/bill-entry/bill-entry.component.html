@@ -35,7 +35,10 @@
         </mat-nav-list>
     </div>
     <div class="bill-details-container" #parentContainer>
-        <h3 class="mat-subheader">Bill Details </h3>
+        <div class="top-header">
+            <h3 class="mat-subheader">Bill Details</h3>
+            <button mat-stroked-button color="warn" (click)="deleteBill()"><i class="material-icons">close</i> Delete Bill</button>
+        </div>
         <form class="keyboard-entry-form">
             <mat-form-field class="item-entry">
                 <input type="text" placeholder="Add New Item" aria-label="String" 

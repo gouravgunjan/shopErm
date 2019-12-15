@@ -58,7 +58,7 @@ export class BillPrintDetailsComponent implements OnInit {
     }
 
     printBill() {
-        this.electron.printBillDetails(this.billEntryDetails, this.discount);
+        this.electron.printBillDetails(this.billEntryDetails, this.discount, '');
     }
 
     private _setBillDetails() {
