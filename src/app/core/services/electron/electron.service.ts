@@ -62,7 +62,7 @@ export class ElectronService {
         result.next(false);
       } else {
         const win = new this.remote.BrowserWindow({
-          // show: false
+          show: false
         });
         win.loadFile('C:/temp/print.html');
         // win.webContents.openDevTools();

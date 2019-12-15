@@ -55,7 +55,7 @@ export class BillEntryComponent implements OnInit, OnDestroy, AfterViewInit {
     newMenuItemControl = new FormControl();
     newBillEntryControl = new FormControl();
     promoCodeControl = new FormControl();
-    newBillEntryButtonEnabled = true;
+    newBillEntryButtonEnabled = false;
     newMenuItem: string;
     sgstTotal = 0;
     cgstTotal = 0;

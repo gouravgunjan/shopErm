@@ -35,15 +35,14 @@ export class PrintTemplateProcessor {
         return `<html>
                     <body>
                         <div class="header">
-                            <span class="kitchen-name">Noco Kitchen</span>
+                            <span class="kitchen-name">Noco Kitchen (<span>${formattedDate}</span>)</span>
                             <div class="additonal-details">
                                 <span>Bill No. ${billNumber}</span>
-                                <span>Date: ${formattedDate}</span>
+                                <span>[29AAQFD3229A1ZK]</span>
                             </div>
                             <div class="other-details">
-                            GST # - <br/>
-                            Call us on - <br/>
-                            Customer - ${customer}
+                                <div>Ph - 7903443098</div>
+                                <div class="customer">Customer - ${customer}</div>
                             </div>
                             <span>---------------------------------------------------------------------------------</span>
                         </div>
@@ -108,6 +107,20 @@ export class PrintTemplateProcessor {
                             font-size: 16px;
                             font-weight: bold;
                             margin-bottom: 10px;
+                        }
+                        .other-details {
+                            width: calc(100% - 10px);
+                            padding-top: 6px;
+                        }
+                        .other-details div {
+                            padding-bottom: 6px;
+                            width: 100%;
+                            justify-content: space-between;
+                            font-size: 12px;
+                        }
+                        .other-details .customer {
+                            font-size: 14px;
+                            font-weight: bold;
                         }
                         .header {
                             display: flex;
