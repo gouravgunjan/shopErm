@@ -5,7 +5,8 @@ import * as moment from 'moment';
 export class PrintTemplateProcessor {
 
     private static getItemSingleRow(itemName: string, itemQuantity: number, itemPrice: number): string {
-        return `<tr><td class="data item">${itemName}</td><td class="data">${itemQuantity}</td><td  class="data">${itemPrice}</td></tr>`;
+        return `<tr><td class="data item">${itemName}</td><td class="data">${itemQuantity}</td>
+        <td  class="data price">${itemPrice}</td></tr>`;
     }
 
     private static getItemRowsString(billDetailRows: BillDetailItem[]): string {
@@ -61,15 +62,15 @@ export class PrintTemplateProcessor {
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">Total (excluding taxes)</td>
-                                <td class="data">${additionalDetails.totalWithoutGst}</td>
+                                <td class="data price">${additionalDetails.totalWithoutGst}</td>
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">SGST (2.5%)</td>
-                                <td class="data">${sgstValue}</td>
+                                <td class="data price">${sgstValue}</td>
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">CGST (2.5%)</td>
-                                <td class="data">${cgstValue}</td>
+                                <td class="data price">${cgstValue}</td>
                             </tr>
                             ${discountRow}
                             <tr>
@@ -77,7 +78,7 @@ export class PrintTemplateProcessor {
                             </tr>
                             <tr>
                                 <td class="item data" colspan="2">Total</td>
-                                <td class="data">Rs. ${totalValue}</td>
+                                <td class="data price">Rs. ${totalValue}</td>
                             </tr>
                             <tr>
                                 <td colspan="3">---------------------------------------------------------------------------------</td>
@@ -139,11 +140,17 @@ export class PrintTemplateProcessor {
                             text-align: left;
                             padding-left: 6px;
                         }
+                        tr {
+                            padding-top: 3px;
+                        }
                         td.item {
                             width: 144px;
                         }
                         td.data {
                             padding-left: 6px;
+                        }
+                        td.data.price {
+                            font-size: 14px;
                         }
                     </style>
                 </html>`;
