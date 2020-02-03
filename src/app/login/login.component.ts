@@ -24,7 +24,7 @@ export class LoginComponent {
             private router: Router) { }
 
     public onLoginClick(): void {
-        console.log(this.userId, this.password);
+        console.log('username password', this.userId, this.password);
         this.isLoading = true;
         this.sessionManager.login(this.userId, this.password).subscribe((result: string) => {
             if (result !== loginMessages.successMessage) {

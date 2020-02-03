@@ -130,7 +130,9 @@ export class DatabaseService {
     public checkUserCredentials(userId: string, password: string): Observable<string> {
         const resultSubject  = new Subject<string>();
         this.runQuery(`SELECT COUNT(*) FROM user_repo where userId='${userId}' and password='${password}'`).subscribe(queryResult => {
-            resultSubject.next((queryResult[0]['COUNT(*)'] > 0) ? loginMessages.successMessage : loginMessages.failureMessage);
+            resultSubject.next(
+                (queryResult[0]['COUNT(*)'] > 0) ? loginMessages.successMessage : loginMessages.failureMessage
+            );
         }, error => {
             console.log(error);
             resultSubject.next(databaseGenericMessages.connectionFailureMessage);
