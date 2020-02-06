@@ -2,6 +2,9 @@
 
 # This product is still in Development and was created as initial prototype
 
+This is a running screenshot for the project
+![Running Project Screenshot](running_ss.png)
+
 # Introduction - Shop ERM
 
 Bootstrap and package your project with Angular 8 and Electron (Typescript + SASS + Hot Reload) for creating Desktop applications.
